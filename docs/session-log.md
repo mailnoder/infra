@@ -41,6 +41,7 @@ docker compose up --build -d
 docker compose logs -f
 docker exec -it mailwizz-php bash
 ```
+
 ---
 
 ## Session 2 — First Successful Container Run & Permission Fix
@@ -68,3 +69,28 @@ docker exec -it mailwizz-php bash
   - First run → `docker compose up --build -d`
   - Normal restart → `docker compose up -d`
   - Stop → `docker compose down`
+
+  ---
+
+## Session 3 — Versioning, Release Strategy & Repo Maturity  
+### 02/21/2026
+
+- Confirmed development server running cleanly  
+- Evaluated whether to tag repository after stable local build  
+- Reviewed Git tagging strategy for infrastructure projects  
+- Established semantic versioning awareness (`v1.0.0` discussion)  
+
+- Learned difference between:
+  - Git tag  
+  - GitHub Release  
+  - Regular commit history  
+
+- Determined that first stable running stack qualifies for initial version tag  
+
+- Reviewed commit message discipline:
+  - `refactor:` for config restructuring  
+  - `chore:` for build/config additions  
+  - `docs:` for README or documentation updates  
+
+- Validated `refactor: docker-compose nginx config` as proper Conventional Commit usage  
+- Reinforced repo professionalism for portfolio presentation  
