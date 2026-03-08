@@ -131,7 +131,7 @@ docker compose build --no-cache
 docker compose up
 ```
 
-Detached mode:
+Detached mode: (best to see logs in dev stack)
 
 ```bash
 docker compose up -d
