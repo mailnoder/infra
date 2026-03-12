@@ -10,9 +10,10 @@ if [ ! -d "$APP_ROOT" ]; then
 fi
 
 # Create MailWizz runtime paths inside the bind-mounted app directory so they
-# persist on the host in development.
+# persist on the host in development and have the right permissions set for mailwizz.
 for path in \
     "$APP_ROOT/apps/extensions" \
+    "$APP_ROOT/apps/common/config" \
     "$APP_ROOT/apps/common/runtime" \
     "$APP_ROOT/apps/common/runtime/mutex" \
     "$APP_ROOT/backend/assets/cache" \
