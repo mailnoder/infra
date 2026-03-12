@@ -123,3 +123,45 @@ docker exec -it mailwizz-php bash
 
 - Confirmed development instance progressing toward clean install state  
 - Continued building production-ready discipline even in local dev environment
+
+---
+
+## Session 5 — Installation Persistence, Runtime Awareness & Source Ownership  
+### 03/12/2026  
+
+- Restarted MailWizz stack and verified application remained installed after `docker compose down` / `up`  
+- Confirmed installation state persists because configuration and data are stored in the MySQL database rather than the filesystem  
+
+- Investigated why targeting the installer directory no longer renders the installer interface  
+  - Observed that requests redirect to the main application dashboard  
+  - Learned that MailWizz disables installer routes after successful installation  
+
+- Began analyzing where application edits should live inside a containerized environment  
+  - Distinguished between infrastructure configuration and application source code  
+  - Recognized the difference between container runtime and bind-mounted development files  
+
+- Discussed repository strategy for customizing MailWizz  
+  - Source code should be tracked separately from infrastructure configuration  
+  - Need to differentiate between:
+    - Application **source files**
+    - **Runtime state files** (cache, uploads, temp data)
+    - **Infrastructure configuration** (Docker, Nginx, Compose)
+
+- Explored customization options for branding MailWizz for business use  
+  - Custom logo  
+  - CSS styling  
+  - Login page appearance  
+  - Footer branding (`dadesigns`)  
+
+- Observed that some visible UI elements were difficult to locate via project search  
+  - Reinforced understanding that large frameworks generate UI from multiple template layers  
+
+- Reinforced architectural understanding of the stack:
+  - **Containers** run the application services  
+  - **Bind mounts** expose the application source to the development environment  
+  - **Database** stores installation state and operational data  
+
+- Confirmed development environment is now stable enough to support:
+  - Application customization  
+  - Campaign testing  
+  - Continued infrastructure experimentation
