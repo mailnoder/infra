@@ -2,6 +2,13 @@
 
 This project uses **Docker + Docker Compose** to run MailWizz in a controlled development environment.
 
+Important path mapping for local development:
+
+- Host path: `./web`
+- Container path: `/var/www/web`
+
+If you shell into the PHP container, make changes only under `/var/www/web`. Changes made elsewhere in the container filesystem will not sync back to the host.
+
 The development environment mirrors production as closely as possible while allowing debugging, rebuilds, and safe experimentation.
 
 ---
