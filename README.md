@@ -121,10 +121,11 @@ Current emphasis:
 
 ## Documentation
 
-Additional project notes live here:
+Project documentation is maintained in the repository Wiki:
 
-- [docs/development.md](/home/dadesigns41/mailwizz-test/mailwizz-infra-stack/docs/development.md)
-- [docs/session-log.md](/home/dadesigns41/mailwizz-test/mailwizz-infra-stack/docs/session-log.md)
+- [Development Notes](https://github.com/dadesigns41/mailwizz-infra-stack/wiki/home/)
+- [Session Log](../../wiki/Session-Log)
+
 
 ## Next Improvements
 
