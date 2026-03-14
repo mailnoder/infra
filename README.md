@@ -1,217 +1,138 @@
-# 📬 MailWizz Self-Hosted Infrastructure Project
+# MailWizz Infrastructure Stack
 
-## 📖 Overview
+This repository contains a local-first Docker environment for running MailWizz with a production-minded structure. It is built to make the stack understandable, reproducible, and easy to iterate on while keeping the infrastructure concerns separate from the application runtime.
 
-This project documents my journey of building and deploying a production-style MailWizz email marketing platform using Docker.
+The current setup focuses on:
 
-Rather than simply deploying a prebuilt image, this project focuses on:
+- Running MailWizz behind Nginx and PHP-FPM
+- Keeping MySQL data persistent with Docker volumes
+- Supporting Redis, MailHog, and phpMyAdmin for development
+- Bootstrapping MailWizz runtime directories automatically
+- Running MailWizz cron jobs inside the PHP container
+- Documenting the workflow as the project evolves
 
-- Infrastructure design
-- Environment separation
-- Security hardening
-- Reverse proxy architecture
-- Persistent data strategy
-- Backup planning
-- Version control discipline
-- Documentation-first development
+## Stack Overview
 
-The goal is to treat this as a real SaaS infrastructure build, not just a container deployment.
+The Docker Compose stack currently includes:
 
----
+- `mailwizz-webserver`: Nginx entrypoint for the app on `http://localhost:8080`
+- `mailwizz-php`: custom PHP 8.3 FPM image for MailWizz
+- `mailwizz-mysql`: MySQL 8.0 with a named Docker volume
+- `mailwizz-redis`: Redis 7 for caching/session-related experimentation
+- `mailwizz-mailhog`: local SMTP capture and message viewer
+- `mailwizz-phpmyadmin`: database UI on `http://localhost:8081`
 
-# 🎯 Project Goals
+Mail flow in development:
 
-- Build MailWizz using a production-grade Docker architecture
-- Separate development and production environments
-- Implement proper reverse proxy configuration
-- Use secure environment variable management
-- Maintain persistent database storage
-- Implement backup strategy
-- Document the entire process clearly
-- Avoid undocumented “mystery fixes”
+```text
+Browser -> Nginx -> PHP-FPM -> MySQL
+                         |
+                         -> Redis
+                         -> Cron jobs
 
----
-
-# 🏗 Architecture Overview
-
-## Production Flow
-
-```
-Cloudflare
-    ↓
-Nginx (reverse proxy container)
-    ↓
-PHP-FPM (MailWizz container)
-    ↓
-MySQL (database container)
+MailWizz -> MailHog
 ```
 
-## Components
+## Repository Layout
 
-### Nginx
-- Reverse proxy
-- SSL termination
-- Routes traffic to PHP-FPM
-
-### PHP-FPM
-- Runs MailWizz application
-
-### MySQL
-- Persistent database
-- Stored in Docker volume
-
-### Optional Extensions
-- Redis (caching)
-- Dedicated cron container
-- Health checks
-- Log aggregation
-
----
-
-# 🗂 Project Structure
-
-```
-mailwizz/
-│
-├── docker/
-│   ├── nginx/
-│   │   └── nginx.conf
-│   ├── php/
-│   │   └── Dockerfile
-│   └── mysql/
-│
+```text
+.
+├── Dockerfile
 ├── docker-compose.yml
-├── docker-compose.dev.yml
-├── .env
-├── .env.example
-│
-├── web/                # MailWizz source files
-│
-├── logs/
-│   ├── nginx/
-│   └── php/
-│
-└── scripts/
-    ├── backup.sh
-    └── restore.sh
+├── start.sh
+├── mwcron
+├── nginx/
+│   └── nginx.conf
+├── docs/
+│   ├── development.md
+│   └── session-log.md
+└── web/
+    └── MailWizz application files
 ```
 
----
+## How This Repo Works
 
-# 🌎 Environment Strategy
+`Dockerfile` builds the PHP-FPM container and installs the PHP extensions MailWizz needs.
 
-This project uses two environments:
+`start.sh` prepares required writable runtime paths inside `/var/www/web`, starts cron, and then launches PHP-FPM in the foreground.
 
-## Development (Local)
+`mwcron` defines the MailWizz scheduled tasks such as queue processing, campaign sending, bounce handling, and daily/hourly jobs.
 
-- Used for testing and iteration
-- Runs via `docker-compose.dev.yml`
-- No public exposure
-- Self-signed or no SSL required
+`nginx/nginx.conf` routes requests to the proper MailWizz entrypoints and forwards PHP execution to the `mailwizz-php` service.
 
-## Production (VPS)
+## Local Development
 
-- Publicly accessible
-- Behind Cloudflare proxy
-- SSL enabled (Full Strict mode)
-- Hardened Ubuntu server
-- UFW firewall enabled
-- SSH key authentication only
+Start the stack with:
 
----
-
-# 🔐 Security Strategy
-
-## VPS Hardening
-
-- Disable root login
-- SSH keys only
-- UFW firewall enabled
-- Automatic security updates
-- Only ports 22, 80, 443 open
-
-## Application Security
-
-- Environment variables stored in `.env`
-- `.env` never committed
-- `.env.example` committed
-- No secrets inside docker-compose files
-
----
-
-# 🐳 Docker Strategy
-
-This project avoids copy-pasted stacks.
-
-Each service is explicitly defined:
-
-- `nginx`
-- `php-fpm`
-- `mysql`
-
-## Docker Best Practices Used
-
-- Explicit volumes
-- `restart: unless-stopped`
-- Health checks (optional)
-- Isolated service networking
-- No hardcoded credentials
-
----
-
-# 🧠 Lessons This Project Is Designed to Teach
-
-- The difference between “it works” and “it’s engineered”
-- How reverse proxies function
-- How environment variables protect secrets
-- Why volume management matters
-- The importance of documentation
-- Infrastructure thinking over feature thinking
-
----
-
-# 🚀 Future Improvements
-
-- Add Redis for caching
-- Add monitoring (Prometheus / Grafana)
-- Implement CI/CD pipeline
-- Add automated backup scheduling
-- Add staging environment
-- Write deployment automation scripts
-- Add healthcheck endpoints
-
----
-
-# 📌 Why This Project Exists
-
-I previously deployed systems without documenting the process.  
-This repository exists to correct that mistake.
-
-Every change will be committed clearly.
-
-Examples:
-
-```
-feat: initial infrastructure layout
-fix: nginx fastcgi configuration
-refactor: separated dev and prod compose files
-docs: added architecture documentation
+```bash
+docker compose up --build -d
 ```
 
-The goal is to build discipline, not just software.
+Useful URLs:
 
----
+- MailWizz: `http://localhost:8080`
+- MailWizz installer: `http://localhost:8080/install/`
+- phpMyAdmin: `http://localhost:8081`
+- MailHog: `http://localhost:8025`
 
-# 👨‍💻 Author Notes
+Default database settings in the current compose file:
 
-This project represents a shift from:
+- Host: `mailwizz-mysql`
+- Database: `mailwizz`
+- Username: `mailwizz`
+- Password: `mailwizzpassword`
 
-> “Deploying containers”
+If you are installing MailWizz for the first time, use those values in the installer.
 
-to
+## Runtime Notes
 
-> “Engineering infrastructure”
+This stack is optimized for local iteration rather than hardened production deployment.
 
-It prioritizes clarity, structure, and production thinking over speed.
+- Nginx is exposed on port `8080`, not `80`
+- SSL is not enabled in the current local config
+- Mail is routed to MailHog instead of a real provider
+- Cron runs inside the PHP container instead of a dedicated worker container
+- MySQL and Redis persist through named Docker volumes
 
-This repository represents a documented engineering journey, not just a deployed application.
+The PHP startup script also creates the writable MailWizz directories that commonly break fresh installs:
+
+- `apps/extensions`
+- `apps/common/config`
+- `apps/common/runtime`
+- `apps/common/runtime/mutex`
+- `backend/assets/cache`
+- `customer/assets/cache`
+- `customer/assets/files`
+- `frontend/assets/cache`
+- `frontend/assets/files`
+- `frontend/assets/gallery`
+
+## Project Direction
+
+The project started as a self-hosted infrastructure exercise and has evolved into a working development stack. The main goal is still the same: build MailWizz in a way that is understandable, deliberate, and documented instead of treating deployment like a black box.
+
+Current emphasis:
+
+- Clean container boundaries
+- Repeatable local setup
+- Clear service roles
+- Persistent state where it matters
+- Documentation alongside implementation
+
+## Documentation
+
+Additional project notes live here:
+
+- [docs/development.md](/home/dadesigns41/mailwizz-test/mailwizz-infra-stack/docs/development.md)
+- [docs/session-log.md](/home/dadesigns41/mailwizz-test/mailwizz-infra-stack/docs/session-log.md)
+
+## Next Improvements
+
+The README now reflects the current repo, but the stack still has room to grow:
+
+- Move credentials out of `docker-compose.yml` into environment files
+- Add health checks for core services
+- Separate development and production configuration
+- Add backup and restore scripts
+- Introduce a production-ready SSL and reverse proxy strategy
+- Decide whether MailWizz source should remain vendored here or be managed separately
