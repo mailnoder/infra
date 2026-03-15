@@ -194,3 +194,57 @@ docker exec -it mailwizz-php bash
 - Reinforced goal of maintaining a **clean, professional infrastructure repository**
 
 ---
+
+## Session 7 — MailWizz Source Repository & Upstream Tracking Setup  
+### 03/15/2026
+
+- Created a new repository dedicated to the **MailWizz application source code**
+- Separated application source from infrastructure to maintain a clean architecture:
+  - `mailwizz-infra-stack` → Docker, services, runtime environment
+  - `mailwizz-source` → MailWizz application code and future customizations
+
+- Imported clean MailWizz **v2.6.5 source baseline** into the new repository
+- Created repository documentation explaining:
+  - project purpose
+  - upstream tracking strategy
+  - runtime file exclusion strategy
+
+- Implemented `.gitignore` to exclude runtime-generated directories including:
+  - cache directories
+  - upload directories
+  - logs
+  - environment-specific files
+
+- Performed Git index cleanup to ensure ignored files were not tracked:
+  - `git rm -r --cached .`
+  - `git add .`
+
+- Created initial baseline commit:
+  - `chore: import MailWizz v2.6.5 source baseline`
+
+- Implemented vendor tracking structure using two branches:
+  - `master` → customization branch
+  - `upstream` → clean MailWizz source history
+
+- Tagged baseline version:
+  - `mailwizz-2.6.5`
+
+- Pushed repository to GitHub including:
+  - `master` branch
+  - `upstream` branch
+  - version tag
+
+- Encountered GitHub **push protection** triggered by example AWS credential strings inside vendor source
+  - Investigated flagged locations
+  - Determined they were placeholder examples within MailWizz source
+
+- Replaced credential-like examples with safe placeholders to satisfy GitHub secret scanning:
+  - `YOUR_AWS_SMTP_USERNAME`
+  - `YOUR_AWS_SMTP_PASSWORD`
+
+- Amended baseline commit to remove flagged values and successfully pushed repository
+
+- Verified final repository state:
+  - `master`, `upstream`, and `mailwizz-2.6.5` tag all reference the same clean baseline commit
+
+- Confirmed repository now follows a **professional vendor-tracking workflow** for maintaining upstream software while supporting local customization
