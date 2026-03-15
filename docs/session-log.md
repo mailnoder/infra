@@ -165,3 +165,32 @@ docker exec -it mailwizz-php bash
   - Application customization  
   - Campaign testing  
   - Continued infrastructure experimentation
+
+  ---
+
+## Session 6 — Dev Infrastructure Release & Repo Scope Definition  
+### 03/14/2026
+
+- Finalized first **dev-ready infrastructure milestone** for the MailWizz stack  
+- Created GitHub release to capture stable development environment baseline  
+
+- Clarified repository scope:
+  - Repo contains **infrastructure only**
+  - MailWizz application source will live in a **separate repository**
+
+- Confirmed repository provides everything needed to:
+  - extract MailWizz source
+  - run Docker build
+  - launch development stack with minimal commands
+
+- Cleaned up repository structure to reduce size and keep scope focused
+
+- Moved extended documentation to the **GitHub Wiki**
+  - Removed local documentation references from README
+  - Prevented repo from becoming documentation-heavy
+
+- Reviewed wording for release notes and milestone naming
+
+- Reinforced goal of maintaining a **clean, professional infrastructure repository**
+
+---
