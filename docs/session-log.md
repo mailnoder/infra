@@ -248,3 +248,70 @@ docker exec -it mailwizz-php bash
   - `master`, `upstream`, and `mailwizz-2.6.5` tag all reference the same clean baseline commit
 
 - Confirmed repository now follows a **professional vendor-tracking workflow** for maintaining upstream software while supporting local customization
+
+---
+
+## Session 8 — Runtime Directory Git Strategy Investigation  
+### 03/16/2026
+
+- Investigated MailWizz installer failure caused by missing runtime directories after cloning the repository
+
+- Identified likely root cause:
+  - `.gitignore` rules currently ignore entire runtime directories
+  - Git does not track empty directories, which can cause required folders to be absent after cloning
+
+- Confirmed MailWizz expects several runtime paths to exist during installation, including:
+
+```
+apps/common/runtime/
+backend/assets/cache/
+customer/assets/cache/
+customer/assets/files/
+frontend/assets/cache/
+frontend/assets/files/
+frontend/assets/gallery/
+```
+
+- Determined that ignoring directories directly may prevent these required paths from existing in a clean clone
+
+- Evaluated correct Git strategy for handling framework runtime directories:
+  - Ignore **directory contents**, not the directory itself
+  - Preserve required folder structure using `.gitkeep` placeholder files
+
+- Drafted revised `.gitignore` pattern to support this approach:
+
+```
+folder/*
+!folder/.gitkeep
+```
+
+- Planned to add `.gitkeep` files to required runtime directories in the next development session
+
+- Created **GitHub Issue #1** to formally track the repository structure fix
+
+- Reviewed repository architecture to confirm correct separation of responsibilities:
+
+```
+mailwizz-infra-stack  → Docker infrastructure and runtime environment
+mailwizz-source       → MailWizz application source code
+```
+
+- Confirmed `web/` is intentionally ignored in the infrastructure repository because it represents a **bind-mounted application directory**
+
+- Verified that the MailWizz application source is tracked separately within the `mailwizz-source` repository
+
+- Confirmed vendor tracking workflow within the source repository:
+
+```
+master   → customization branch
+upstream → clean vendor reference
+```
+
+- Ensured both branches currently share an identical baseline commit to allow future comparison between upstream code and custom modifications
+
+- Reinforced understanding of Git behavior relevant to framework projects:
+  - Git tracks files, not directories
+  - Ignoring a directory prevents Git from evaluating nested `.gitignore` rules
+  - Runtime directories in many frameworks must be preserved even when their contents are ignored
+
+- Session concluded with repository structure analysis complete and fix strategy planned for implementation in the next development session
