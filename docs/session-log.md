@@ -315,3 +315,48 @@ upstream → clean vendor reference
   - Runtime directories in many frameworks must be preserved even when their contents are ignored
 
 - Session concluded with repository structure analysis complete and fix strategy planned for implementation in the next development session
+
+---
+
+## Session 9 — Runtime Directory Fix & Repository Architecture Clarification  
+### 03/17/2026
+
+- Diagnosed MailWizz installer failure caused by missing runtime directories  
+- Identified root cause:
+  - `.gitignore` excluded entire directories instead of only their contents  
+  - Git does not track empty directories, causing required paths to be missing after clone  
+
+- Implemented fix using `.gitkeep` pattern:
+  - Preserved required directory structure
+  - Ignored runtime-generated files
+  - Restored installer compatibility  
+
+- Cleaned up unintended filesystem artifacts:
+  - Removed incorrectly created nested `git-gitkeep` directories  
+  - Rebuilt directory structure in a controlled manner  
+
+- Verified repository integrity:
+  - Confirmed required directories exist and are tracked via `.gitkeep`  
+  - Validated no source files were lost (`~6300+ files tracked`)  
+
+- Investigated `.gitignore` impact on upstream:
+  - Confirmed no critical files were excluded from version control  
+  - Distinguished between source files and runtime/generated assets  
+
+- Analyzed branch structure and responsibilities:
+  - Determined `upstream` branch was unintentionally mixed with environment files  
+  - Identified need for separation between:
+    - **vendor source (upstream)**
+    - **working environment (master)**  
+
+- Began refactoring repository architecture:
+  - Isolated environment-specific files (`.gitignore`, `.gitkeep`, Docker configs)  
+  - Prepared to clean upstream branch to maintain pure source reference  
+
+- Reinforced key engineering concepts:
+  - Git tracks files, not directories  
+  - Separation of source code vs runtime environment  
+  - Importance of validating filesystem state during debugging  
+  - Maintaining clean repository boundaries for long-term scalability  
+
+---
