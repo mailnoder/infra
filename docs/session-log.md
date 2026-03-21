@@ -360,3 +360,88 @@ upstream → clean vendor reference
   - Maintaining clean repository boundaries for long-term scalability  
 
 ---
+
+## Session 10 — Organization Setup, Branding, and Production Deployment Planning  
+### 03/20/2026
+
+- Established **MailNoder** as a formal project identity:
+  - Selected naming convention:
+    - Brand: **MailNoder**
+    - System/infra: `mailnoder`
+  - Evaluated naming consistency across:
+    - GitHub organization
+    - domain planning
+    - future email infrastructure  
+
+- Initiated transition from personal development to **organization-based architecture**:
+  - Created GitHub organization under **“business or institution”**
+  - Defined separation between:
+    - personal account (developer identity)
+    - organization (product identity)
+
+- Designed initial repository structure for scalability:
+  - Planned core repositories:
+    - `infra` → Docker, nginx, networking
+    - `platform` → application logic, configuration
+    - `ops` → automation, scripts
+    - `mailwizz-upstream` → isolated vendor source
+  - Reinforced importance of:
+    - separating vendor code from system logic
+    - maintaining clean architectural boundaries
+
+- Explored branding system for project-wide consistency:
+  - Generated initial **MailNoder logo and asset concepts**
+  - Defined need for production-ready assets:
+    - logo variants (light/dark)
+    - icon + favicon
+    - email header + branding badge
+  - Established `/brand` as a reusable asset layer across:
+    - frontend (future)
+    - MailWizz UI
+    - email campaigns
+
+- Clarified asset pipeline limitations:
+  - Identified difference between:
+    - design mockups (composed images)
+    - production assets (separate usable files)
+  - Planned transition to clean asset exports for integration
+
+- Evaluated project identity infrastructure:
+  - Debated use of:
+    - personal email vs project email
+  - Chose to **defer domain-based email setup**
+    - avoided premature infrastructure complexity
+    - prioritized development momentum
+
+- Defined production deployment requirements:
+  - Identified need for `docker-compose.prod.yml`
+  - Distinguished dev vs production concerns:
+    - persistent storage (volumes)
+    - SSL (HTTPS via reverse proxy)
+    - network exposure (public access)
+  - Planned minimal production architecture:
+    - nginx (SSL termination)
+    - MailWizz container
+    - database with persistent volume
+
+- Established core deployment objective:
+  - Transition from:
+    - local-only development environment
+  - To:
+    - publicly accessible demo instance (`mailnoder.<domain>`)
+
+- Reinforced key engineering concepts:
+  - Separation of development vs production environments
+  - Importance of persistence in containerized systems
+  - Reverse proxy role in modern web architecture
+  - Branding as part of system design, not just aesthetics
+  - Organizations as a structural layer for scalable projects
+
+- Defined next milestone:
+  - Deploy first live, accessible MailNoder instance
+  - Validate:
+    - login access
+    - dashboard functionality
+    - basic email campaign flow
+
+---
