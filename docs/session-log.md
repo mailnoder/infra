@@ -445,3 +445,100 @@ upstream → clean vendor reference
     - basic email campaign flow
 
 ---
+
+## Session 11 — Repo Strategy, Upstream Integrity, and Dev Identity Positioning  
+### 03/21/2026
+
+- Refined **repository strategy for MailWizz integration**:
+  - Clarified separation between:
+    - upstream (vendor source of truth)
+    - platform (custom logic + modifications)
+  - Resolved confusion around:
+    - committing distribution vs source versions
+  - Confirmed approach:
+    - upstream repo contains **full distributed MailWizz package**
+    - includes `vendor/` to preserve exact dependency state
+
+- Solidified **branching model for vendor control**:
+  - Established structure:
+    - `main` → reference / pointer to latest usable version
+    - version branches (e.g. `v2.6.x`) → actual upstream snapshots
+  - Reinforced importance of:
+    - not modifying upstream directly
+    - preserving clean upgrade path
+
+- Addressed **dependency management concerns**:
+  - Evaluated role of `composer.json` vs `vendor/`
+  - Concluded:
+    - relying solely on composer introduces uncertainty
+    - including `vendor/` = **“baked-in dependencies”**
+  - Strengthened understanding of:
+    - reproducible builds vs dynamic installs
+
+- Debugged **Git issues related to `.gitignore` and runtime files**:
+  - Encountered conflict between:
+    - ignoring runtime directories
+    - preserving required folder structure
+  - Implemented solution:
+    - use `.gitkeep` for empty required directories
+    - avoid polluting upstream with environment-specific rules
+  - Learned impact of:
+    - `.gitignore` changes on tracked files and history
+
+- Practiced **Linux file and directory inspection techniques**:
+  - Used tools like `diff -qr` to compare distributions
+  - Explored ways to:
+    - list directory structures
+    - identify hidden differences between versions
+  - Improved ability to audit large codebases efficiently
+
+- Clarified **distribution vs source concepts**:
+  - Distribution:
+    - pre-packaged, ready-to-run (includes vendor + compiled assets)
+  - Source:
+    - requires build steps (composer, asset compilation)
+  - Confirmed MailWizz operates as a **distribution-first system**
+
+- Evaluated **GitHub organization structure vs personal repos**:
+  - Weighed branding consistency vs simplicity
+  - Confirmed organization approach aligns with:
+    - long-term product vision
+    - multi-repo architecture
+
+- Explored **developer identity and exposure strategy**:
+  - Identified importance of:
+    - GitHub
+    - LinkedIn
+    - visible project work
+  - Learned terminology:
+    - “developer positioning” / “building in public”
+  - Connected idea of:
+    - real projects → real opportunities
+
+- Reviewed **developer tooling for secrets and credentials**:
+  - Identified tools like:
+    - Bitwarden (selected)
+  - Reinforced importance of:
+    - secure storage for:
+      - API keys
+      - login credentials
+      - infrastructure access
+
+- Continued **Linux environment workflow improvements**:
+  - Installed `.deb` packages manually (Bitwarden)
+  - Troubleshot permission-related apt warnings
+  - Gained familiarity with:
+    - package installation outside of Snap ecosystem
+
+- Reinforced broader engineering mindset:
+  - Architecture decisions early → less pain later
+  - Clean separation of concerns = scalability
+  - Version control is not just storage, but **system design**
+  - Small mistakes (like `.gitignore`) can cascade into structural issues
+
+- Defined next milestone:
+  - Finalize clean upstream repository state
+  - Establish stable integration path into `mailnoder/platform`
+  - Begin preparing **production-ready deployment configuration**
+
+---
