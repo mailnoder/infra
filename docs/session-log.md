@@ -542,3 +542,126 @@ upstream → clean vendor reference
   - Begin preparing **production-ready deployment configuration**
 
 ---
+
+## Session 12 — Docker Recovery, Repo Linking, and Runtime Control  
+### 03/22/2026
+
+- Resolved **repository rename + local linkage confusion**:
+  - Confirmed that:
+    - renaming a GitHub repo does NOT break local repo
+    - remote URL simply needs updating if issues occur
+  - Reinforced understanding of:
+    - `origin` as a pointer, not a hard dependency
+  - Practiced maintaining continuity between:
+    - local repo state
+    - remote repository identity
+
+- Recovered from **Docker container naming conflict**:
+  - Encountered error:
+    - container name already in use (`mailwizz-mailhog`)
+  - Diagnosed root cause:
+    - previously created container still exists (even if stopped)
+  - Executed cleanup workflow:
+    - removed conflicting containers
+    - reset environment to allow clean startup
+  - Strengthened understanding of:
+    - Docker container lifecycle (running vs stopped vs removed)
+
+- Established **clean reset workflow for Docker environments**:
+  - Learned practical “wipe and restart” strategy:
+    - remove containers
+    - optionally remove volumes/networks if needed
+  - Recognized importance of:
+    - avoiding stale state during rapid iteration
+  - Built confidence in:
+    - recovering broken environments quickly
+
+- Successfully relaunched **MailWizz stack with minimal commands**:
+  - Achieved working state using:
+    - simplified Docker commands
+  - Reinforced goal of:
+    - reducing startup friction
+    - making environment reproducible
+
+- Clarified **runtime vs source control boundaries**:
+  - Revisited question:
+    - “Why protect runtime if only pulling?”
+  - Internalized that `.gitignore` is about:
+    - protecting future commits
+    - preventing accidental pollution of source
+  - Evaluated idea of:
+    - ignoring entire `web/` directory vs selective control
+  - Recognized tradeoff:
+    - convenience vs long-term maintainability
+
+- Explored **repo structure decisions (infra vs platform)**:
+  - Debated placement of `web/` directory:
+    - inside `infra` (runtime-focused)
+    - inside `platform` (source-focused)
+  - Identified emerging architecture direction:
+    - `platform` → application + controlled source
+    - `infra` → execution layer (Docker, nginx, services)
+  - Highlighted need for:
+    - clean integration path for upstream updates
+
+- Investigated **strategies for integrating upstream updates**:
+  - Considered approaches:
+    - manual zip replacement
+    - `rsync` syncing
+    - git-based workflows
+  - Recognized core challenge:
+    - maintaining clean diff between:
+      - vendor upstream
+      - custom modifications
+  - Continued moving toward:
+    - structured, repeatable update process
+
+- Introduced concept of **bind mounts in Docker**:
+  - Learned that bind mounts:
+    - map host directories into containers
+    - persist data outside container lifecycle
+  - Connected concept to:
+    - runtime persistence (uploads, cache, logs)
+  - Realized:
+    - containers can be destroyed/recreated without losing data
+  - Identified importance for:
+    - production-ready storage strategy
+
+- Mapped **MailWizz directory responsibilities**:
+  - Began distinguishing between:
+    - code (tracked)
+    - runtime (ephemeral / persistent data)
+    - cache (rebuildable)
+  - Discussed examples:
+    - compiled templates (generated from backend templating engine)
+  - Clarified role of framework:
+    - Yii provides structure + basic caching (not a full caching system like Redis)
+
+- Reinforced understanding of **application frameworks**:
+  - Clarified that Yii is:
+    - a PHP framework (not a caching engine)
+  - Compared conceptually to:
+    - other backend frameworks that provide:
+      - routing
+      - templating
+      - basic caching layers
+
+- Strengthened **mental model of system design layers**:
+  - Application (MailWizz / Yii)
+  - Platform (custom integration + config)
+  - Infrastructure (Docker, nginx, networking)
+  - Runtime (data persistence layer)
+
+- Reinforced engineering mindset:
+  - Fast recovery > perfect setup during early stages
+  - Understanding system boundaries is key to scaling
+  - Containers are disposable — data is not
+  - Repo structure decisions directly impact future velocity
+
+- Defined next milestone:
+  - Finalize placement of `web/` within architecture
+  - Establish clean upstream update workflow
+  - Introduce persistent volumes for production data
+  - Move toward stable dev vs production environment separation
+
+---
