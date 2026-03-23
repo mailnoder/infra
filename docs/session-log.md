@@ -665,3 +665,154 @@ upstream → clean vendor reference
   - Move toward stable dev vs production environment separation
 
 ---
+
+## Session 13 — Reproducible Build System, Upstream Control & Dev Workflow Design  
+### 03/23/2026
+
+- Stabilized **MailWizz development environment (v2.6.5)**:
+  - Confirmed application runs reliably via Docker
+  - Verified installation persists across container restarts
+  - Established working baseline for further system design
+  - Recognized importance of:
+    - locking a known-good version before introducing upgrades
+
+- Clarified **build vs runtime vs system layers**:
+  - Distinguished between:
+    - Dockerfile → system dependencies (PHP, services)
+    - build phase → assembling `/web` from upstream
+    - runtime phase → container startup (`start.sh`)
+  - Identified prior confusion as:
+    - mixing responsibilities across layers
+  - Established clean mental model:
+    - system → build → runtime
+
+- Formalized **application build process (previously manual)**:
+  - Identified prior workflow:
+    - manual creation of `web/`
+    - manual extraction of upstream files
+  - Reframed this as:
+    - an implicit “app build phase”
+  - Transitioned to:
+    - explicit, automated build pipeline
+
+- Implemented first version of **`build.sh` (app assembly layer)**:
+  - Automated:
+    - cleaning `/web`
+    - syncing upstream source into runtime directory
+    - starting Docker containers
+  - Introduced `rsync` for:
+    - clean synchronization
+    - removal of stale files
+  - Established:
+    - repeatable, deterministic environment rebuild
+
+- Validated **separation of concerns across scripts**:
+  - `build.sh` → prepares application filesystem
+  - `start.sh` → initializes runtime inside container
+  - Avoided mixing:
+    - file assembly logic with runtime behavior
+  - Reinforced principle:
+    - each layer should do one job well
+
+- Designed **upstream source control strategy**:
+  - Clarified that:
+    - build system uses local upstream copy (not GitHub directly)
+  - Distinguished between:
+    - remote source (GitHub)
+    - local source (`mailwizz-upstream/`)
+    - runtime build (`web/`)
+  - Reinforced importance of:
+    - controlling source inputs explicitly
+
+- Introduced **`setup.sh` (source acquisition layer)**:
+  - Automated:
+    - cloning MailWizz upstream
+    - selecting specific version via argument
+  - Implemented shallow clone strategy:
+    - `--branch <version> --depth 1`
+  - Optimized for:
+    - snapshot-style versioning
+    - minimal disk usage
+    - faster setup
+
+- Evaluated **branch vs tag vs commit for version control**:
+  - Identified risk:
+    - branches can move (non-deterministic)
+  - Established best practice:
+    - prefer tags or fixed versions for reproducibility
+  - Reinforced concept:
+    - builds must depend on immutable inputs
+
+- Adopted **artifact-based mindset for upstream repo**:
+  - Treated each version as:
+    - a complete, isolated snapshot
+  - Shifted perspective from:
+    - “codebase under development”
+    - → “versioned distribution artifact”
+  - Enabled:
+    - clean version switching via re-clone
+
+- Designed **version-switching workflow**:
+  - Established flow:
+    - `./setup.sh vX.X.X`
+    - `./build.sh`
+  - Accepted tradeoff:
+    - shallow clone requires re-clone per version
+  - Gained:
+    - clarity, predictability, and isolation between versions
+
+- Explored **automation boundaries (setup vs build)**:
+  - Questioned combining cloning + building
+  - Determined:
+    - separation improves:
+      - debugging clarity
+      - execution control
+      - performance (avoid unnecessary downloads)
+  - Introduced concept of:
+    - higher-level wrapper script (`dev.sh`)
+
+- Designed **multi-layer script architecture**:
+  - `setup.sh` → fetches source
+  - `build.sh` → assembles application
+  - `start.sh` → runs services
+  - `dev.sh` (planned) → orchestrates workflow
+  - Established pattern aligned with:
+    - real-world CI/CD pipelines
+
+- Reinforced **reproducibility as primary goal**:
+  - Eliminated manual steps from build process
+  - Ensured:
+    - consistent environment across rebuilds
+  - Reduced:
+    - human error
+    - hidden state issues
+
+- Strengthened understanding of **Docker workflow integration**:
+  - Integrated build system with:
+    - `docker compose up --build`
+  - Recognized difference between:
+    - rebuilding containers
+    - rebuilding application filesystem
+  - Improved confidence in:
+    - orchestrating full environment lifecycle
+
+- Identified key architectural milestone:
+  - Transition from:
+    - “getting MailWizz running”
+    - → “building a controlled, reproducible platform”
+
+- Reinforced engineering mindset:
+  - Separate concerns before combining them
+  - Control inputs before automating outputs
+  - Reproducibility > convenience
+  - Systems should be rebuildable from zero at any time
+
+- Defined next steps:
+  - Implement `dev.sh` wrapper for unified workflow
+  - Add flags:
+    - `--update`, `--reset-db`, `--no-build`
+  - Introduce dev vs production build modes
+  - Begin layering custom platform modifications over upstream
+  - Prepare for controlled upgrade path (2.6 → 2.7)
+
+---
