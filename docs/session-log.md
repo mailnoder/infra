@@ -816,3 +816,145 @@ upstream → clean vendor reference
   - Prepare for controlled upgrade path (2.6 → 2.7)
 
 ---
+
+## Session 14 — Environment Separation, Production Simulation & Deployment Readiness  
+### 03/30/2026
+
+- Transitioned from **single-environment setup → multi-environment architecture**:
+  - Identified current Docker setup as:
+    - development-centric (MailHog, phpMyAdmin, bind mounts)
+  - Established need for:
+    - explicit dev vs production separation
+  - Adopted pattern:
+    - `docker-compose.dev.yml`
+    - `docker-compose.prod.yml`
+  - Removed ambiguity of default compose file usage
+
+- Refactored existing Docker Compose into **environment-specific configurations**:
+  - Preserved development features in:
+    - `docker-compose.dev.yml`
+  - Created production configuration with:
+    - reduced surface area
+    - minimal exposed services
+  - Eliminated dev-only services in production:
+    - MailHog
+    - phpMyAdmin
+  - Reinforced principle:
+    - development ≠ production
+
+- Introduced **production-safe configuration practices**:
+  - Replaced hardcoded credentials with:
+    - environment variables (`.env`)
+  - Created `.env.prod.example` template:
+    - documents required variables
+    - prevents accidental secret exposure
+  - Established pattern:
+    - example file tracked in Git
+    - real `.env` excluded
+
+- Implemented **application storage strategy for production**:
+  - Identified issue:
+    - dev bind mounts (`./web`) not suitable for production
+  - Transitioned to:
+    - named Docker volumes (`mailwizz_app_data`)
+  - Reinforced understanding:
+    - production containers must be self-contained
+    - application should not depend on host filesystem
+
+- Designed **Nginx environment separation**:
+  - Created:
+    - `nginx/nginx.prod.conf`
+  - Distinguished between:
+    - development routing/debug config
+    - production-ready config (clean, minimal)
+  - Prepared for:
+    - future SSL + domain integration
+
+- Validated **production compose execution locally**:
+  - Practiced full teardown of dev environment:
+    - `docker compose down`
+    - optional volume removal for clean state
+  - Ensured:
+    - no container conflicts between environments
+  - Successfully executed:
+    - `docker compose -f docker-compose.prod.yml up -d --build`
+  - Verified:
+    - container startup
+    - service health via logs
+
+- Reinforced **clean environment reset workflow**:
+  - Introduced commands for:
+    - stopping containers
+    - removing volumes
+    - full system pruning (optional)
+  - Reduced risk of:
+    - hidden state bugs
+    - conflicting containers/ports
+
+- Clarified **production vs development runtime behavior**:
+  - Development:
+    - live file editing via bind mounts
+    - debugging tools enabled
+    - multiple exposed ports
+  - Production:
+    - prebuilt application inside container
+    - minimal exposed ports (80/443)
+    - no debug tooling
+  - Solidified mental model:
+    - dev = convenience
+    - prod = stability + isolation
+
+- Strengthened understanding of **container independence**:
+  - Verified that production environment:
+    - runs without reliance on local filesystem
+  - Highlighted importance of:
+    - Dockerfile copying application into image
+  - Identified Dockerfile as:
+    - critical component for production readiness
+
+- Formalized **repository structure for multi-environment deployment**:
+  - Added:
+    - `.env.prod.example`
+    - `docker-compose.dev.yml`
+    - `docker-compose.prod.yml`
+    - `nginx/nginx.prod.conf`
+  - Ensured repository communicates:
+    - clear operational workflows
+    - environment-specific execution paths
+
+- Improved **developer experience and onboarding clarity**:
+  - Added README instructions for:
+    - development startup
+    - production simulation
+  - Established:
+    - reproducible commands for both environments
+  - Reinforced goal:
+    - anyone can clone and run with minimal friction
+
+- Elevated project from:
+  - “local Docker setup”
+  - → “environment-aware infrastructure system”
+
+- Identified critical milestone:
+  - First successful **local production simulation**
+  - Demonstrates:
+    - system portability
+    - deployment readiness
+    - understanding of real-world environment differences
+
+- Reinforced engineering principles:
+  - Explicit environments > implicit defaults
+  - Production must be self-contained
+  - Secrets must be externalized
+  - Dev tooling should never leak into production
+  - Systems should be testable in production-like conditions locally
+
+- Defined next steps:
+  - Validate Dockerfile copies application correctly for production
+  - Integrate SMTP using Brevo for real email delivery
+  - Execute first full campaign (end-to-end test)
+  - Capture screenshots/demo for portfolio
+  - Add SSL + domain routing (future production layer)
+  - Continue refining README for public presentation
+
+---

@@ -1,0 +1,58 @@
+services:
+  mailwizz-mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mailwizz}
+      MYSQL_USER: ${MYSQL_USER:-mailwizz}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+    volumes:
+      - mailwizz_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mailwizz-redis:
+    image: redis:7-alpine
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - mailwizz_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailwizz-php:
+    build: .
+    restart: always
+    depends_on:
+      mailwizz-mysql:
+        condition: service_healthy
+      mailwizz-redis:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-UTC}
+      APP_ROOT: /var/www/web
+    volumes:
+      - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web
+
+  mailwizz-webserver:
+    image: nginx:1.26-alpine
+    restart: always
+    depends_on:
+      - mailwizz-php
+    volumes:
+      - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web:ro
+      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${MAILWIZZ_HTTP_PORT:-80}:80"
+
+volumes:
+  mailwizz_mysql_data:
+  mailwizz_redis_data:
