@@ -8,6 +8,8 @@ services:
       MYSQL_USER: ${MYSQL_USER:-mailwizz}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
     volumes:
+      # Named Docker volume for MySQL's internal data directory.
+      # This keeps the database files across container rebuilds/restarts.
       - mailwizz_mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
@@ -21,6 +23,8 @@ services:
     restart: always
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
+      # Named Docker volume for Redis append-only/persistent data.
+      # Without this, Redis data would be lost when the container is replaced.
       - mailwizz_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -40,6 +44,15 @@ services:
       TZ: ${TZ:-UTC}
       APP_ROOT: /var/www/web
     volumes:
+      # Volume syntax is HOST_OR_VOLUME:CONTAINER_PATH[:MODE]
+      # - A bind mount uses a real host path like ./web
+      # - A named volume uses a Docker-managed volume like mailwizz_mysql_data
+      # - :ro means the container can read the mount but cannot write to it
+      # Bind-mount the application source into the PHP container.
+      # This is different from the named DB/Redis volumes above: it points at
+      # the host's app files instead of a Docker-managed data volume.
+      # App persistence comes from the checked-out files in ./web, not from
+      # container-local storage.
       - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web
 
   mailwizz-webserver:
@@ -48,11 +61,16 @@ services:
     depends_on:
       - mailwizz-php
     volumes:
+      # The webserver mounts the same app files, but read-only since Nginx only
+      # needs to serve them and should not write application data here.
       - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web:ro
+      # Read-only bind mount for the production Nginx vhost configuration.
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "${MAILWIZZ_HTTP_PORT:-80}:80"
 
 volumes:
+  # Docker-managed named volumes used for service data that must survive
+  # container replacement. Docker stores these outside the container filesystem.
   mailwizz_mysql_data:
   mailwizz_redis_data:
