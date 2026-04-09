@@ -54,6 +54,14 @@ services:
       # App persistence comes from the checked-out files in ./web, not from
       # container-local storage.
       - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web
+      # Named volumes for runtime data that must persist across container rebuilds.
+      # These override the bind-mount for specific subdirectories to use Docker volumes.
+      - mailwizz_customer_files:/var/www/web/customer/assets/files
+      - mailwizz_frontend_files:/var/www/web/frontend/assets/files
+      - mailwizz_frontend_gallery:/var/www/web/frontend/assets/gallery
+      - mailwizz_common_config:/var/www/web/apps/common/config
+      - mailwizz_common_runtime:/var/www/web/apps/common/runtime
+      - mailwizz_extensions:/var/www/web/apps/extensions
 
   mailwizz-webserver:
     image: nginx:1.26-alpine
@@ -74,3 +82,10 @@ volumes:
   # container replacement. Docker stores these outside the container filesystem.
   mailwizz_mysql_data:
   mailwizz_redis_data:
+  # Volumes for MailWizz runtime data persistence
+  mailwizz_customer_files:
+  mailwizz_frontend_files:
+  mailwizz_frontend_gallery:
+  mailwizz_common_config:
+  mailwizz_common_runtime:
+  mailwizz_extensions:

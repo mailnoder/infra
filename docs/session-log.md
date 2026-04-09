@@ -958,3 +958,380 @@ upstream → clean vendor reference
   - Continue refining README for public presentation
 
 ---
+
+## Session 15 — Domain Awareness, Deployment Direction & Content Workflow  
+### 04/04/2026
+
+- Re-evaluated **current project position within the deployment lifecycle**:
+  - Recognized shift from:
+    - local development focus
+  - → toward:
+    - real-world deployment requirements
+  - Identified missing layer:
+    - domain + HTTPS integration
+
+- Clarified **infrastructure progression strategy**:
+  - Confirmed priority:
+    - dev → production (skip staging for now)
+  - Avoided premature complexity
+  - Reinforced approach:
+    - build → validate → expose → secure
+
+- Validated **current Docker-based development environment**:
+  - Continued using:
+    - Nginx (port 8080)
+    - PHP-FPM (MailWizz)
+    - MySQL
+    - MailHog (dev only)
+  - Confirmed:
+    - services running and accessible locally
+  - Strengthened understanding of:
+    - container networking
+    - service dependencies
+
+- Reinforced **container lifecycle and environment behavior**:
+  - Reviewed:
+    - `docker compose up`
+    - `docker compose down`
+    - rebuild patterns
+  - Identified importance of:
+    - clean restarts
+    - avoiding port conflicts
+  - Improved confidence in:
+    - debugging container issues via logs
+
+- Identified **critical bottleneck to further progress**:
+  - Local-only environment limits:
+    - no public access
+    - no real-world testing
+  - Root cause:
+    - no domain configured
+    - no HTTPS layer
+
+- Established **next-phase infrastructure requirements**:
+  - Domain setup (Cloudflare or DNS provider)
+  - DNS routing:
+    - domain → server IP
+  - Nginx update:
+    - domain-based routing instead of localhost
+  - HTTPS integration:
+    - Let’s Encrypt or Cloudflare SSL
+
+- Clarified **relationship between local dev and production exposure**:
+  - Local (`localhost:8080`):
+    - isolated
+    - fast iteration
+  - Domain:
+    - public-facing
+    - required for real usage
+  - Solidified understanding:
+    - infrastructure is incomplete without networking layer
+
+- Introduced **deployment-first thinking mindset**:
+  - Shifted perspective from:
+    - “is it running?”
+  - → to:
+    - “can users access it?”
+  - Recognized:
+    - deployment is part of development, not a separate phase
+
+- Defined **incremental deployment strategy**:
+  - Step 1:
+    - connect domain to server
+  - Step 2:
+    - verify DNS propagation
+  - Step 3:
+    - update Nginx config for domain
+  - Step 4:
+    - enable HTTPS
+  - Step 5:
+    - test public access
+
+- Established **content creation workflow alongside development**:
+  - Planned to:
+    - record build sessions
+    - convert into educational content
+  - Identified opportunity:
+    - turn real engineering work into portfolio assets
+  - Reinforced:
+    - learning in public strategy
+
+- Strengthened **engineering awareness and decision-making**:
+  - Avoided over-optimizing local setup
+  - Focused on:
+    - meaningful next constraint
+  - Demonstrated ability to:
+    - pause
+    - reassess direction
+    - prioritize correctly
+
+- Reinforced key principles:
+  - Local success ≠ production readiness
+  - Systems must be accessible, not just functional
+  - Networking (DNS + HTTPS) is a core part of infrastructure
+  - Progress is defined by removing real constraints
+
+- Identified milestone transition:
+  - From:
+    - “dev-ready environment”
+  - → to:
+    - “deployment-ready system”
+
+- Defined next steps:
+  - Configure domain DNS (Cloudflare or provider)
+  - Point domain to server IP
+  - Update Nginx for domain routing
+  - Implement HTTPS (Let’s Encrypt or Cloudflare)
+  - Validate public accessibility
+  - Record full deployment process for content
+
+---
+
+## Session 16 — Production Entry, VPS Setup & Command Layer Clarity  
+### 04/05/2026
+
+- Initiated **transition from local environment to real production infrastructure**:
+  - Acquired:
+    - VPS with root access (Ryzen cores, dedicated IPv4)
+  - Recognized shift from:
+    - local-only development
+  - → toward:
+    - publicly accessible deployment environment
+
+- Established **initial server provisioning awareness**:
+  - Reviewed:
+    - hostname configuration during VPS setup
+  - Clarified:
+    - relationship between domain and hostname
+  - Identified:
+    - need for DNS configuration via provider (Namecheap)
+
+- Explored **domain structure for production deployment**:
+  - Selected:
+    - new TLD (`mailnoder.website`)
+  - Considered:
+    - subdomain strategy (`mail.mailnoder.website`)
+  - Understood:
+    - requirement to map domain → VPS IP via DNS records
+
+- Clarified **DNS and nameserver responsibilities**:
+  - Identified:
+    - domain provider (Namecheap) manages DNS by default
+  - Recognized:
+    - nameservers can remain default unless delegating (e.g., Cloudflare)
+  - Reduced confusion around:
+    - empty nameserver fields during VPS setup
+
+- Evaluated **infrastructure readiness vs domain setup timing**:
+  - Questioned:
+    - whether to configure volumes and persistence before domain
+  - Clarified:
+    - infrastructure should be stable before exposing publicly
+  - Reinforced:
+    - order of operations matters in deployment lifecycle
+
+- Introduced **production compose strategy refinement**:
+  - Planned:
+    - `docker-compose.prod.yml`
+  - Differentiated from:
+    - development environment
+  - Reinforced:
+    - separation of concerns between dev and prod configs
+
+- Strengthened understanding of **Docker command structure and execution context**:
+  - Revisited:
+    - multi-line vs single-line command execution
+  - Clarified:
+    - shell behavior with `\` line continuation
+  - Improved:
+    - confidence in running complex Docker commands
+
+- Identified **importance of persistence in production systems**:
+  - Discussed:
+    - Docker volumes vs bind mounts
+  - Recognized:
+    - need for data durability beyond container lifecycle
+  - Connected:
+    - persistence to real-world reliability requirements
+
+- Reinforced **infrastructure-first mindset**:
+  - Prioritized:
+    - stable runtime environment before domain exposure
+  - Avoided:
+    - premature public deployment
+  - Focused on:
+    - building a solid foundation
+
+- Introduced **content capture during real engineering work**:
+  - Recorded:
+    - session activity for future use
+  - Recognized:
+    - value of documenting real problem-solving
+  - Continued building:
+    - learn-in-public workflow
+
+- Strengthened **decision-making under uncertainty**:
+  - Navigated:
+    - unclear VPS setup fields
+    - DNS vs hosting responsibilities
+  - Demonstrated:
+    - ability to pause and question assumptions
+  - Improved:
+    - clarity around deployment components
+
+- Reinforced key principles:
+  - Production environments require persistence and planning
+  - DNS and hosting are separate but connected systems
+  - Domain setup should follow infrastructure readiness
+  - Clear command execution reduces operational errors
+  - Real-world deployment introduces new layers of complexity
+
+- Identified milestone transition:
+  - From:
+    - “local dev environment working”
+  - → to:
+    - “entering production infrastructure phase”
+
+- Defined next steps:
+  - Finalize production Docker setup (`docker-compose.prod.yml`)
+  - Ensure volume persistence is correctly configured
+  - Validate container startup on VPS
+  - Configure domain DNS to point to server IP
+  - Prepare Nginx for domain-based routing
+  - Continue recording sessions for content creation
+
+---
+
+## Session 17 — Production Compose Debugging, Env Injection & Container Networking  
+### 04/06/2026
+
+- Transitioned fully into **production-mode Docker workflow**:
+  - Began using:
+    - `docker-compose.prod.yml`
+    - `.env.prod`
+  - Shifted away from:
+    - dev bind mounts
+  - → toward:
+    - persistent Docker volumes
+    - production-like configuration
+
+- Successfully executed **full production container build and startup**:
+  - Built:
+    - custom PHP-FPM image via Dockerfile
+  - Initialized services:
+    - Nginx (webserver)
+    - PHP-FPM (MailWizz)
+    - MySQL
+    - Redis
+  - Observed:
+    - healthy container states
+    - successful service orchestration
+
+- Validated **persistent storage strategy using Docker volumes**:
+  - Created volumes for:
+    - MailWizz runtime directories
+    - user-uploaded assets
+    - extensions and config
+  - Confirmed:
+    - separation from dev bind mounts
+    - alignment with production persistence requirements
+
+- Encountered and debugged **Nginx 502 Bad Gateway error**:
+  - Identified root cause:
+    - mismatch between Nginx upstream and Docker service name
+  - Reinforced understanding of:
+    - Docker internal DNS (service name = hostname)
+    - Nginx ↔ PHP-FPM communication via port 9000
+  - Recognized importance of:
+    - consistency between compose services and config
+
+- Deepened understanding of **container networking and service discovery**:
+  - Learned:
+    - containers communicate via service names, not localhost
+  - Practiced:
+    - verifying connectivity between services
+  - Strengthened mental model of:
+    - reverse proxy architecture
+
+- Encountered **environment variable interpolation failure in Compose**:
+  - Error:
+    - missing `MYSQL_ROOT_PASSWORD`
+  - Identified cause:
+    - required env vars not provided at runtime
+  - Learned:
+    - Compose parses variables before executing any command
+    - even `down` fails without required env
+
+- Reinforced **environment-based configuration strategy**:
+  - Implemented:
+    - `.env.prod` for sensitive values
+  - Used:
+    - `--env-file` flag for injection
+  - Understood:
+    - containers do not store configuration state
+    - env must be provided on every execution
+
+- Discovered **MySQL initialization behavior with Docker volumes**:
+  - Learned:
+    - env vars only apply on first container initialization
+  - Identified issue:
+    - existing volume prevents password changes
+  - Applied solution:
+    - `docker compose down -v` to force reinitialization
+
+- Resolved **Compose command failure during teardown**:
+  - Identified:
+    - env interpolation required even for `down`
+  - Applied fix:
+    - include `--env-file` in all commands
+  - Strengthened understanding of:
+    - Compose as a config parser, not just runtime tool
+
+- Introduced **operational consistency via command abstraction**:
+  - Designed approach:
+    - wrapper script (`prod.sh`) for all production commands
+  - Eliminated risk of:
+    - forgetting env injection
+  - Improved:
+    - repeatability and reliability of workflow
+
+- Evaluated **configuration strategy for production safety**:
+  - Considered:
+    - default fallback values in compose
+  - Rejected for production:
+    - due to risk of silent misconfiguration
+  - Chose:
+    - strict env enforcement + controlled execution
+
+- Strengthened **production engineering mindset**:
+  - Prioritized:
+    - correctness over convenience
+  - Adopted:
+    - fail-fast behavior for missing config
+  - Recognized:
+    - difference between dev flexibility and production reliability
+
+- Reinforced key principles:
+  - Docker volumes control data persistence, not env vars
+  - Environment variables must be injected at runtime every time
+  - Service names define internal networking in Docker
+  - Reverse proxies depend on correct upstream configuration
+  - Production systems should fail loudly, not silently fallback
+
+- Identified milestone transition:
+  - From:
+    - “dev environment working locally”
+  - → to:
+    - “production-configured system with real constraints”
+
+- Defined next steps:
+  - Confirm Nginx ↔ PHP-FPM connectivity is stable
+  - Complete MailWizz installation via browser
+  - Remove `/install` directory after setup
+  - Configure domain DNS to point to server IP
+  - Update Nginx for domain-based routing
+  - Implement HTTPS (Let’s Encrypt or Cloudflare)
+  - Validate public access to application
+  - Capture full deployment process for content creation
+
+---
