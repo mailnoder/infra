@@ -1335,3 +1335,29 @@ upstream → clean vendor reference
   - Capture full deployment process for content creation
 
 ---
+
+## Session 16 — VPS Selection & Hosting Strategy
+#### (2026-04-10)
+
+- Researched multiple VPS providers (free and paid options)
+- Identified risks with unreliable providers (scam sites, verification issues, timeouts)
+- Evaluated major platforms:
+  - Azure (approved with $100 credit)
+  - IONOS (pending verification)
+  - Various low-cost VPS providers
+- Decided to prioritize a stable VPS with root access for MailWizz deployment
+
+- Explored VPS configuration options:
+  - Server OS vs Desktop OS
+  - Prebuilt images vs manual Docker setup
+- Clarified goal of running MailWizz in a production-like Docker environment
+
+- Reviewed domain and DNS setup strategy:
+  - Nameservers (Namecheap)
+  - Subdomain planning for production instance
+
+- Key Insight:
+  Infrastructure decisions directly impact deployment stability.
+  Avoid unreliable “free VPS” providers for production systems.
+  ---
+  
