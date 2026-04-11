@@ -1336,7 +1336,7 @@ upstream → clean vendor reference
 
 ---
 
-## Session 16 — VPS Selection & Hosting Strategy
+## Session 18 — VPS Selection & Hosting Strategy
 #### (2026-04-10)
 
 - Researched multiple VPS providers (free and paid options)
