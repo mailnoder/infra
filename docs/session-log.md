@@ -1337,7 +1337,7 @@ upstream → clean vendor reference
 ---
 
 ## Session 18 — VPS Selection & Hosting Strategy
-#### (2026-04-10)
+### 2026/04/10
 
 - Researched multiple VPS providers (free and paid options)
 - Identified risks with unreliable providers (scam sites, verification issues, timeouts)
@@ -1359,5 +1359,71 @@ upstream → clean vendor reference
 - Key Insight:
   Infrastructure decisions directly impact deployment stability.
   Avoid unreliable “free VPS” providers for production systems.
+  
   ---
   
+## Session 19 — VPS Acquisition and SSH Access  
+### 04/11/2026
+
+- Acquired and provisioned a **free-tier VPS (Student & Developer Plan)**:
+  - 4 AMD Ryzen cores, 4 GB RAM, 4 TB bandwidth
+  - Full root access with dedicated IPv4 and IPv6
+  - Evaluated multiple VPS providers before selecting a stable option
+
+- Completed **initial server access setup**:
+  - Successfully connected via SSH using:
+    - `ssh root@<server-ip>`
+  - Verified server identity and authenticated host fingerprint
+  - Confirmed root-level access and command execution capability
+
+- Explored initial server environment:
+  - Identified default working directory (`/root`)
+  - Practiced navigation commands:
+    - `ls`, `pwd`, `cd`, `cd ..`
+  - Observed Linux root filesystem structure (`/`)
+
+- Built foundational understanding of:
+  - Remote server access
+  - Linux directory hierarchy
+  - Difference between local vs remote environments
+
+  ---
+
+## Session 20 — System Initialization, Docker Setup, and Production Structure  
+### 04/12/2026
+
+- Performed **system initialization and updates**:
+  - Ran full system update:
+    - `apt update && apt upgrade -y`
+  - Ensured base system packages were current and secure
+
+- Installed **core infrastructure dependencies**:
+  - Docker (`docker.io`)
+  - Docker Compose
+  - Git for repository management
+
+- Enabled and verified Docker runtime:
+  - `systemctl enable docker`
+  - `systemctl start docker`
+  - Confirmed installation via:
+    - `docker --version`
+    - `docker compose version`
+
+- Began **production filesystem structuring**:
+  - Established `/opt/mailnoder` as application root
+  - Adopted Linux filesystem best practices for service-based deployments
+  - Reinforced separation between:
+    - system directories
+    - user home directories
+    - application environments
+
+- Navigated Linux filesystem hierarchy:
+  - Practiced use of `cd`, `cd ..`, `pwd`, and `ls -la`
+  - Identified root (`/`) vs user (`/root`) vs application (`/opt`) directories
+
+- Prepared for **infrastructure deployment phase**:
+  - Discussed cloning MailWizz infrastructure repository onto VPS
+  - Identified need for environment configuration via `.env.prod`
+  - Reviewed Docker Compose production startup flow
+ 
+---
