@@ -1428,7 +1428,7 @@ upstream → clean vendor reference
  
 ---
 
-## Session 20 — MailNoder Deployment (First Live System)  
+## Session 21 — MailNoder Deployment (First Live System)  
 ### 04/15/2026
 
 - Established **production deployment workflow**:
