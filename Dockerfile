@@ -30,6 +30,10 @@ COPY mwcron /etc/cron.d/mwcron
 RUN chmod 0644 /etc/cron.d/mwcron \
     && crontab /etc/cron.d/mwcron
 
+# Copy the MailWizz application into the image for a true production build.
+COPY web /var/www/web
+RUN chown -R www-data:www-data /var/www/web
+
 # Start both cron and php-fpm
 COPY start.sh /start.sh
 RUN chmod +x /start.sh

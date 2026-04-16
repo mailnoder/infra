@@ -99,6 +99,11 @@ Useful URLs:
 - phpMyAdmin: `http://localhost:8081`
 - MailHog: `http://localhost:8025`
 
+Production notes:
+
+- `docker-compose.prod.yml` now bakes the app code into the PHP image and uses a shared named volume for `/var/www/web`.
+- This avoids empty host volume overlays and gives a more production-like build experience.
+
 Default database settings for the installer:
 
 - Host: `mailwizz-mysql`

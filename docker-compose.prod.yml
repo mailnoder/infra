@@ -44,21 +44,13 @@ services:
       TZ: ${TZ:-UTC}
       APP_ROOT: /var/www/web
     volumes:
-      # Volume syntax is HOST_OR_VOLUME:CONTAINER_PATH[:MODE]
-      # - A bind mount uses a real host path like ./web
-      # - A named volume uses a Docker-managed volume like mailwizz_mysql_data
-      # - :ro means the container can read the mount but cannot write to it
-      # Bind-mount the application source into the PHP container.
-      # This is different from the named DB/Redis volumes above: it points at
-      # the host's app files instead of a Docker-managed data volume.
-      # App persistence comes from the checked-out files in ./web, not from
-      # container-local storage.
-      - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web
+      # App code is baked into the PHP image and mounted via a named volume.
+      - mailwizz_app:/var/www/web
       # Named volumes for runtime data that must persist across container rebuilds.
-      # These override the bind-mount for specific subdirectories to use Docker volumes.
       - mailwizz_customer_files:/var/www/web/customer/assets/files
       - mailwizz_frontend_files:/var/www/web/frontend/assets/files
       - mailwizz_frontend_gallery:/var/www/web/frontend/assets/gallery
+      - mailwizz_backend_cache:/var/www/web/backend/assets/cache
       - mailwizz_common_config:/var/www/web/apps/common/config
       - mailwizz_common_runtime:/var/www/web/apps/common/runtime
       - mailwizz_extensions:/var/www/web/apps/extensions
@@ -69,9 +61,12 @@ services:
     depends_on:
       - mailwizz-php
     volumes:
-      # The webserver mounts the same app files, but read-only since Nginx only
-      # needs to serve them and should not write application data here.
-      - ${MAILWIZZ_APP_PATH:-./web}:/var/www/web:ro
+      # The webserver mounts the baked app code read-only.
+      - mailwizz_app:/var/www/web:ro
+      - mailwizz_customer_files:/var/www/web/customer/assets/files:ro
+      - mailwizz_frontend_files:/var/www/web/frontend/assets/files:ro
+      - mailwizz_frontend_gallery:/var/www/web/frontend/assets/gallery:ro
+      - mailwizz_backend_cache:/var/www/web/backend/assets/cache:ro
       # Read-only bind mount for the production Nginx vhost configuration.
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
@@ -82,10 +77,13 @@ volumes:
   # container replacement. Docker stores these outside the container filesystem.
   mailwizz_mysql_data:
   mailwizz_redis_data:
+  # App code volume initialized from the PHP image on first create.
+  mailwizz_app:
   # Volumes for MailWizz runtime data persistence
   mailwizz_customer_files:
   mailwizz_frontend_files:
   mailwizz_frontend_gallery:
+  mailwizz_backend_cache:
   mailwizz_common_config:
   mailwizz_common_runtime:
   mailwizz_extensions:
