@@ -1427,3 +1427,84 @@ upstream → clean vendor reference
   - Reviewed Docker Compose production startup flow
  
 ---
+
+## Session 20 — MailNoder Deployment (First Live System)  
+### 04/15/2026
+
+- Established **production deployment workflow**:
+  - Created and pushed `prod` branch for stable deployments
+  - Reinforced separation between `dev` (development) and `prod` (deployment)
+  - Aligned VPS to pull exclusively from `prod` branch
+
+- Deployed infrastructure to VPS:
+  - Cloned repository into `/opt/mailnoder`
+  - Corrected initial directory structure (removed nested repo folder)
+  - Verified production-ready file layout
+
+- Prepared application layer:
+  - Created `/web` directory for MailWizz source
+  - Uploaded MailWizz upstream package via `scp`
+  - Extracted and corrected nested directory structure
+  - Verified proper application root (`apps/`, `backend/`, `frontend/`, `install/`)
+
+- Configured production environment:
+  - Created `.env.prod` from template
+  - Defined database credentials and application path
+  - Ensured environment file aligned with Docker Compose configuration
+
+- Addressed runtime and build considerations:
+  - Recognized difference between bind-mounted vs baked production environments
+  - Applied permissions prior to image build to ensure correct runtime behavior
+  - Clarified role of `start.sh` as container entrypoint (not host script)
+
+- Installed and configured Docker on VPS:
+  - Installed `docker.io` and `docker-compose`
+  - Enabled and started Docker service
+  - Verified Docker runtime availability
+
+- Executed first production build and deployment:
+  - Ran:
+    - `docker-compose --env-file .env.prod -f docker-compose.prod.yml up -d --build`
+  - Successfully built and started all services:
+    - nginx (webserver)
+    - php-fpm
+    - mysql (healthy)
+    - redis (healthy)
+
+- Verified running system:
+  - Confirmed container status via `docker-compose ps`
+  - Verified port exposure and service availability
+
+- Validated application access:
+  - Accessed MailWizz installer at:
+    - `http://<VPS-IP>/install`
+  - Confirmed full stack routing:
+    - nginx → php-fpm → MailWizz application
+
+- Initiated content pipeline:
+  - Recorded screencast of deployment process
+  - Defined video naming convention:
+    - `YYYY-MM-DD-s##-primary-theme.mkv`
+  - Named deployment recording:
+    - `2026-04-16-s20-mailnoder-deployment.mkv`
+
+### 🧠 Session Impact
+
+This session marks transition from:
+
+- ❌ Local-only development  
+➡️  
+- ✅ Publicly deployed, containerized application  
+
+Key achievements:
+- First successful VPS deployment
+- Full Docker-based multi-service stack running in production
+- Verified external access to application
+- Established reproducible deployment workflow
+- Began structured content creation pipeline
+
+This represents:
+> **initial production deployment of the MailNoder platform**
+
+---
+
