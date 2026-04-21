@@ -1,0 +1,80 @@
+services:
+  mailwizz-mysql:
+    image: mysql:8.0
+    container_name: mailwizz-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mailwizz
+      MYSQL_USER: mailwizz
+      MYSQL_PASSWORD: mailwizzpassword
+    volumes:
+      - mailwizz_mysql_data:/var/lib/mysql
+    # Local-first: avoid host port conflicts unless you truly need it on the host.
+    # If you need host access, use "3307:3306" instead of "3306:3306".
+    # ports:
+    #   - "3307:3306"
+
+  mailwizz-redis:
+    image: redis:7-alpine
+    container_name: mailwizz-redis
+    restart: unless-stopped
+    volumes:
+      - mailwizz_redis_data:/data
+
+  mailwizz-mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailwizz-mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  mailwizz-php:
+    build: .
+    container_name: mailwizz-php
+    restart: unless-stopped
+    depends_on:
+      - mailwizz-mysql
+      - mailwizz-redis
+      - mailwizz-mailhog
+    volumes:
+      - ./web:/var/www/html
+    # Local-first: remove the phpdockerio-specific env vars. Your Dockerfile controls PHP modules.
+    # Keep only what your app truly consumes.
+    environment:
+      TZ: America/New_York
+
+  mailwizz-webserver:
+    image: nginx:1.26-alpine
+    container_name: mailwizz-webserver
+    restart: unless-stopped
+    depends_on:
+      - mailwizz-php
+    volumes:
+      - ./web:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      # Local-first: map to 8080 so you don't need sudo and don't collide with anything already on :80
+      - "8080:80"
+    # Local-first: no SSL yet
+    # volumes:
+    #   - ./ssl:/etc/nginx/ssl
+    # ports:
+    #   - "443:443"
+
+  mailwizz-phpmyadmin:
+    image: phpmyadmin:5
+    container_name: mailwizz-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mailwizz-mysql
+    environment:
+      PMA_HOST: mailwizz-mysql
+      PMA_ARBITRARY: 0
+    ports:
+      - "8081:80"
+
+volumes:
+  mailwizz_mysql_data:
+  mailwizz_redis_data:

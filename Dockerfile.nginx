@@ -1,0 +1,7 @@
+FROM nginx:1.26-alpine
+
+ARG APP_SOURCE=./web
+COPY nginx/nginx.prod.conf /etc/nginx/conf.d/default.conf
+COPY ${APP_SOURCE} /var/www/html
+
+RUN chown -R nginx:nginx /var/www/html

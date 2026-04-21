@@ -1,0 +1,90 @@
+services:
+  mailwizz-mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mailwizz}
+      MYSQL_USER: ${MYSQL_USER:-mailwizz}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+    volumes:
+      # Named Docker volume for MySQL's internal data directory.
+      # This keeps the database files across container rebuilds/restarts.
+      - mailwizz_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mailwizz-redis:
+    image: redis:7-alpine
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      # Named Docker volume for Redis append-only/persistent data.
+      # Without this, Redis data would be lost when the container is replaced.
+      - mailwizz_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailwizz-php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_SOURCE: ${MAILWIZZ_APP_PATH:-./web}
+    restart: always
+    depends_on:
+      mailwizz-mysql:
+        condition: service_healthy
+      mailwizz-redis:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-UTC}
+      APP_ROOT: /var/www/html
+    volumes:
+      # Named volumes for runtime data that must persist across container rebuilds.
+      # These override the app image with persistent runtime directories.
+      - mailwizz_customer_files:/var/www/html/customer/assets/files
+      - mailwizz_frontend_files:/var/www/html/frontend/assets/files
+      - mailwizz_frontend_gallery:/var/www/html/frontend/assets/gallery
+      - mailwizz_common_config:/var/www/html/apps/common/config
+      - mailwizz_common_runtime:/var/www/html/apps/common/runtime
+      - mailwizz_extensions:/var/www/html/apps/extensions
+
+  mailwizz-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+      args:
+        APP_SOURCE: ${MAILWIZZ_APP_PATH:-./web}
+    restart: always
+    depends_on:
+      - mailwizz-php
+    volumes:
+      - mailwizz_customer_files:/var/www/html/customer/assets/files:ro
+      - mailwizz_frontend_files:/var/www/html/frontend/assets/files:ro
+      - mailwizz_frontend_gallery:/var/www/html/frontend/assets/gallery:ro
+      - mailwizz_common_config:/var/www/html/apps/common/config:ro
+      - mailwizz_common_runtime:/var/www/html/apps/common/runtime:ro
+      - mailwizz_extensions:/var/www/html/apps/extensions:ro
+    ports:
+      - "${MAILWIZZ_HTTP_PORT:-80}:80"
+
+volumes:
+  # Docker-managed named volumes used for service data that must survive
+  # container replacement. Docker stores these outside the container filesystem.
+  mailwizz_mysql_data:
+  mailwizz_redis_data:
+  # Volumes for MailWizz runtime data persistence
+  mailwizz_customer_files:
+  mailwizz_frontend_files:
+  mailwizz_frontend_gallery:
+  mailwizz_common_config:
+  mailwizz_common_runtime:
+  mailwizz_extensions:
