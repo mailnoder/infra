@@ -1,5 +1,5 @@
 services:
-  # Nginx Proxy Manager - handles SSL termination and reverse proxy
+  # Nginx Proxy Manager
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
     restart: always
@@ -13,17 +13,16 @@ services:
     environment:
       DB_SQLITE_FILE: /data/database.sqlite
 
+  # MySQL database
   mailwizz-mysql:
     image: mysql:8.0
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-mailwizz}
-      MYSQL_USER: ${MYSQL_USER:-mailwizz}
+      MYSQL_DATABASE: mailwizz
+      MYSQL_USER: mailwizz
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
     volumes:
-      # Named Docker volume for MySQL's internal data directory.
-      # This keeps the database files across container rebuilds/restarts.
       - mailwizz_mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
@@ -32,13 +31,12 @@ services:
       retries: 10
       start_period: 30s
 
+  # Redis cache
   mailwizz-redis:
     image: redis:7-alpine
     restart: always
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      # Named Docker volume for Redis append-only/persistent data.
-      # Without this, Redis data would be lost when the container is replaced.
       - mailwizz_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -46,6 +44,7 @@ services:
       timeout: 5s
       retries: 10
 
+  # PHP-FPM (MailWizz app)
   mailwizz-php:
     build:
       context: .
@@ -58,12 +57,20 @@ services:
         condition: service_healthy
       mailwizz-redis:
         condition: service_healthy
+
     environment:
-      TZ: ${TZ:-UTC}
+      TZ: UTC
+
+      # === DB CONFIG (THIS IS WHAT FIXES YOU) ===
+      DB_CONNECTION_STRING: mysql:host=mailwizz-mysql;dbname=mailwizz
+      DB_USER: mailwizz
+      DB_PASS: ${MYSQL_PASSWORD}
+      DB_PREFIX: mw_
+
+      # optional but useful later
       APP_ROOT: /var/www/html
+
     volumes:
-      # Named volumes for runtime data that must persist across container rebuilds.
-      # These override the app image with persistent runtime directories.
       - mailwizz_customer_files:/var/www/html/customer/assets/files
       - mailwizz_frontend_files:/var/www/html/frontend/assets/files
       - mailwizz_frontend_gallery:/var/www/html/frontend/assets/gallery
@@ -71,6 +78,12 @@ services:
       - mailwizz_common_runtime:/var/www/html/apps/common/runtime
       - mailwizz_extensions:/var/www/html/apps/extensions
 
+      # MailWizz writes generated cache assets here at runtime
+      - mailwizz_backend_cache:/var/www/html/backend/assets/cache
+      - mailwizz_customer_cache:/var/www/html/customer/assets/cache
+      - mailwizz_frontend_cache:/var/www/html/frontend/assets/cache
+
+  # Web server
   mailwizz-webserver:
     build:
       context: .
@@ -80,27 +93,34 @@ services:
     restart: always
     depends_on:
       - mailwizz-php
+    ports:
+      - "8080:80"
     volumes:
+      # Only mount directories that contain assets actually served
+      # to browsers. Configuration, runtime, extensions are never
+      # served statically and don't need to be present here.
       - mailwizz_customer_files:/var/www/html/customer/assets/files:ro
       - mailwizz_frontend_files:/var/www/html/frontend/assets/files:ro
       - mailwizz_frontend_gallery:/var/www/html/frontend/assets/gallery:ro
-      - mailwizz_common_config:/var/www/html/apps/common/config:ro
-      - mailwizz_common_runtime:/var/www/html/apps/common/runtime:ro
-      - mailwizz_extensions:/var/www/html/apps/extensions:ro
-    # No ports exposed - accessed only via internal Docker network by NPM
+
+      # MailWizz generates minified/concatenated static assets at
+      # runtime into these cache directories. Both PHP and Nginx
+      # need to see them. PHP writes, Nginx reads.
+      - mailwizz_backend_cache:/var/www/html/backend/assets/cache:ro
+      - mailwizz_customer_cache:/var/www/html/customer/assets/cache:ro
+      - mailwizz_frontend_cache:/var/www/html/frontend/assets/cache:ro
 
 volumes:
-  # NPM data volumes
   npm_data:
   npm_letsencrypt:
-  # Docker-managed named volumes used for service data that must survive
-  # container replacement. Docker stores these outside the container filesystem.
   mailwizz_mysql_data:
   mailwizz_redis_data:
-  # Volumes for MailWizz runtime data persistence
   mailwizz_customer_files:
   mailwizz_frontend_files:
   mailwizz_frontend_gallery:
   mailwizz_common_config:
   mailwizz_common_runtime:
   mailwizz_extensions:
+  mailwizz_backend_cache:
+  mailwizz_customer_cache:
+  mailwizz_frontend_cache:

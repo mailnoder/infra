@@ -1,0 +1,45 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary / System
+.DS_Store
+Thumbs.db
+*.log
+
+# Docker files themselves
+Dockerfile
+docker-compose*.yml
+.env*
+
+# Nginx config (keep this out unless explicitly needed for build)
+nginx/*
+!nginx/nginx.prod.conf
+!nginx/nginx.conf
+
+# Documentation
+README.md
+docs/
+
+# MailWizz local runtime junk (never bake these into the image)
+web/apps/common/config/main-custom.php
+web/apps/common/config/custom-console.php
+web/apps/common/runtime/
+web/apps/extensions/*/
+web/backend/assets/cache/
+web/customer/assets/cache/
+web/frontend/assets/cache/
+
+# Installer state
+web/install/install.lock
+
+# Composer (vendor is already present in web/ per MailWizz release,
+# so leave it here unless you are running composer install inside the build)
