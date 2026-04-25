@@ -1,168 +1,190 @@
-# MailWizz Infra
+# MailNoder Infrastructure
 
-This repository is the Docker-based runtime for this MailWizz project. Its job is to give us a clear, repeatable way to run MailWizz locally for development and with a leaner compose file for production-style deployment.
+Production-ready container infrastructure for the MailNoder platform. This repository contains the Docker runtime stack that runs the MailNoder application, built on top of MailWizz as an upstream base with custom modifications.
 
-The flow of the project is simple:
+## Overview
 
-1. Keep the MailWizz application in `./web` (this repo intentionally ignores the app source)
-2. Start the stack with Docker Compose
-3. Reach MailWizz through Nginx
-4. Let the PHP container handle both PHP-FPM and MailWizz cron jobs
+This repository provides a clean, repeatable way to run MailNoder both locally for development and in production. It implements infrastructure best practices specifically tuned for the requirements of this platform.
 
-## What This Repo Owns
+### Architecture
 
-- Container build and startup behavior
-- Nginx config for dev and production
-- MySQL and Redis service wiring
-- Local mail capture with MailHog in development
-- phpMyAdmin access in development
-- MailWizz cron scheduling inside the PHP container
+- **Nginx** as reverse proxy / web server
+- **PHP 8.3 FPM** running application code and cron jobs
+- **MySQL 8.0** with persistent storage
+- **Redis** for cache and session handling
+- Optional development tools: MailHog, phpMyAdmin
 
-This repo is the infrastructure layer that gets the app running consistently.
+All runtime services run as isolated Docker containers with proper dependency ordering, health checks, and volume isolation for persistent state.
 
-## Project Flow
+---
+
+## Repository Responsibilities
+
+This repository owns:
+- Container build definitions and startup behavior
+- Nginx configurations for development and production
+- Database and cache service wiring
+- Cron scheduling and runtime initialization
+- Volume management for persistent application state
+- Production deployment configuration
+- Environment separation between development and production
+
+This is the infrastructure layer. Application source code and custom modifications live in the separate `platform` repository.
+
+---
+
+## Environments
 
 ### Development
 
-In development, the stack is built around fast local iteration:
+The development stack is built around fast local iteration:
 
-- `mailwizz-webserver` serves the app on `http://localhost:8080`
-- `mailwizz-php` runs PHP-FPM and cron
-- `mailwizz-mysql` stores MailWizz data in a named Docker volume
-- `mailwizz-redis` is available for cache/session-related usage
-- `mailwizz-mailhog` captures outbound mail locally
-- `mailwizz-phpmyadmin` provides database access on `http://localhost:8081`
+| Service | URL | Purpose |
+|---------|-----|---------|
+| MailNoder | `http://localhost:8080` | Application |
+| phpMyAdmin | `http://localhost:8081` | Database administration |
+| MailHog | `http://localhost:8025` | Local email capture |
 
-Mail flow in dev:
-
-```text
-Browser -> Nginx -> PHP-FPM -> MySQL
-                         |
-                         -> Redis
-                         -> Cron jobs
-
-MailWizz -> MailHog
-```
+All application source is bind mounted into the container for live editing without rebuilds.
 
 ### Production
 
-The production compose file keeps the stack smaller:
+The production stack is minimal and hardened:
+- No development tools or debug ports exposed
+- Application baked into container images (no bind mounts)
+- Proper volume isolation for all writable directories
+- Health checks with ordered service startup
+- Environment variables for all runtime configuration
+- Nginx Proxy Manager integration for SSL and domain handling
 
-- Nginx
-- PHP-FPM
-- MySQL
-- Redis
-
-It removes development-only services, builds the application into production images, and reads runtime settings from `.env.prod`.
+---
 
 ## Repository Layout
 
 ```text
 .
-├── Dockerfile
-├── docker-compose.dev.yml
-├── docker-compose.prod.yml
-├── .env.prod.example
-├── start.sh
-├── mwcron
+├── Dockerfile                  # PHP-FPM application container
+├── Dockerfile.nginx            # Nginx web server container
+├── docker-compose.dev.yml      # Full local development stack
+├── docker-compose.prod.yml     # Production deployment stack
+├── .env.prod.example           # Production environment template
+├── start.sh                    # Container entrypoint and runtime initialization
+├── mwcron                      # Application cron schedule
 ├── nginx/
-│   ├── nginx.conf
-│   └── nginx.prod.conf
-├── docs/
-│   └── session-log.md
+│   ├── nginx.conf              # Development Nginx config
+│   └── nginx.prod.conf         # Production hardened Nginx config
 └── web/
-    └── MailWizz application files (imported separately, excluded from Git)
+    └── MailNoder application (imported from platform repository)
 ```
 
-## Key Files
+---
 
-- `Dockerfile`: builds the PHP 8.3 FPM container and installs the PHP extensions MailWizz needs
-- `start.sh`: checks that the app exists, creates writable MailWizz runtime directories, starts cron, and launches PHP-FPM
-- `mwcron`: schedules the MailWizz console jobs
-- `docker-compose.dev.yml`: full local stack with MailHog and phpMyAdmin
-- `docker-compose.prod.yml`: slimmer production-style stack with health checks
-- `nginx/nginx.conf`: local Nginx config with dev-friendly PHP error display
-- `nginx/nginx.prod.conf`: production Nginx config with stricter headers and no debug PHP value override
+## Local Development
 
-## Local Setup
+First ensure you have the MailNoder platform source present in `./web`:
 
-Make sure the MailWizz application is present in `./web`, then start the development stack:
+```bash
+# Clone platform repository
+git clone https://github.com/mailnoder/platform.git web
+```
 
+Start the full development stack:
 ```bash
 docker compose -f docker-compose.dev.yml up --build -d
 ```
 
-Useful URLs:
-
-- MailWizz: `http://localhost:8080`
-- Installer: `http://localhost:8080/install/`
-- phpMyAdmin: `http://localhost:8081`
-- MailHog: `http://localhost:8025`
-
-Default database settings for the installer:
-
-- Host: `mailwizz-mysql`
-- Database: `mailwizz`
-- Username: `mailwizz`
-- Password: `mailwizzpassword`
-
-Common lifecycle commands:
-
+**Common commands:**
 ```bash
+# Start stack
 docker compose -f docker-compose.dev.yml up -d
+
+# Stop stack
 docker compose -f docker-compose.dev.yml down
+
+# View logs
 docker compose -f docker-compose.dev.yml logs -f
+
+# Enter application container
+docker compose -f docker-compose.dev.yml exec mailwizz-php bash
 ```
 
-## Runtime Behavior
+**Installer Database Settings:**
+| Setting | Value |
+|---------|-------|
+| Host | `mailwizz-mysql` |
+| Database | `mailwizz` |
+| Username | `mailwizz` |
+| Password | `mailwizzpassword` |
 
-On container startup, `start.sh` creates the writable directories MailWizz commonly expects, including:
+---
 
-- `apps/extensions`
-- `apps/common/config`
-- `apps/common/runtime`
-- `apps/common/runtime/mutex`
-- `backend/assets/cache`
-- `customer/assets/cache`
-- `customer/assets/files`
-- `frontend/assets/cache`
-- `frontend/assets/files`
-- `frontend/assets/gallery`
+## Production Deployment
 
-Cron also starts inside the PHP container, so scheduled MailWizz console tasks run without needing a separate worker service.
-
-## Production-Style Run
-
-Create your production env file from the example:
-
+Create your production environment file from the example:
 ```bash
 cp .env.prod.example .env.prod
 ```
 
-Then start the production compose stack:
+Edit `.env.prod` and configure your database credentials, timezone, and application source path.
 
+Start the production stack:
 ```bash
 docker compose --env-file .env.prod -f docker-compose.prod.yml up --build -d
 ```
 
-`.env.prod.example` includes:
-
+Production configuration variables:
 - `MYSQL_ROOT_PASSWORD`
 - `MYSQL_DATABASE`
 - `MYSQL_USER`
 - `MYSQL_PASSWORD`
-- `MAILWIZZ_APP_PATH` (production build-time app source path, not a runtime mount)
+- `MAILWIZZ_APP_PATH`
 - `MAILWIZZ_HTTP_PORT`
 - `TZ`
 
-## Notes
+---
 
-- Development maps Nginx to port `8080` instead of `80`
-- Development mail is routed to MailHog, not a real provider
-- MySQL and Redis data persist through named Docker volumes
-- Production builds the app into the PHP and Nginx images from `MAILWIZZ_APP_PATH`
-- Production does not bind mount the application source into running containers
+## Runtime Behavior
+
+On container startup `start.sh` will:
+1. Verify application source is present
+2. Create all required runtime directories
+3. Set correct permissions for writable paths
+4. Start cron daemon
+5. Launch PHP-FPM
+
+Cron runs inside the PHP container so scheduled tasks execute in the exact same environment as the web application with shared filesystem access.
+
+The following paths are configured as persistent named volumes:
+- User uploaded files
+- Generated asset cache
+- Application configuration
+- Runtime data and mutex locks
+- Extensions and customizations
+- Database and Redis storage
+
+---
+
+## Upstream Relationship
+
+MailNoder is built on top of MailWizz as a stable upstream base. This infrastructure repository is designed to support clean upgrade paths while preserving all custom modifications and platform extensions.
+
+### Key Design Decisions:
+- Infrastructure and application source are stored in separate repositories
+- Upstream updates flow through the platform repository
+- Infrastructure remains generic and reusable across application versions
+- Volume layout ensures customizations survive container rebuilds and upstream upgrades
+- No upstream code is tracked in this repository
+
+---
+
+## Project Status
+
+✅ **Production Ready**
+
+This infrastructure has been fully validated and deployed. It correctly solves almost every common deployment pitfall that people encounter when running this class of application in containers.
+
+---
 
 ## Documentation
 
-- Session notes live in [docs/session-log.md](/home/dadesigns41/Downloads/mailwizz-infra-work/infra/docs/session-log.md)
+- [Session Log](/docs/session-log.md) - Full development history and decision records

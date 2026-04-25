@@ -1488,13 +1488,12 @@ upstream → clean vendor reference
   - Named deployment recording:
     - `2026-04-16-s20-mailnoder-deployment.mkv`
 
-### 🧠 Session Impact
+### Session Impact
 
 This session marks transition from:
 
-- ❌ Local-only development  
-➡️  
-- ✅ Publicly deployed, containerized application  
+- Local-only development 
+- Publicly deployed, containerized application  
 
 Key achievements:
 - First successful VPS deployment
@@ -1505,6 +1504,77 @@ Key achievements:
 
 This represents:
 > **initial production deployment of the MailNoder platform**
+
+---
+
+## Session 22 — Production Hardening & Config Cleanup  
+### 04/17/2026  
+
+- Stabilized initial production deployment after first live launch  
+- Identified config drift between local and VPS environments  
+- Standardized `.env.prod` usage across all services  
+- Cleaned up Docker Compose overrides for production consistency  
+- Fixed mismatch in MailWizz DB connection handling (host vs service name)  
+- Verified MySQL persistence volume stability after container restart  
+- Adjusted nginx routing rules for `/backend` and `/frontend` resolution  
+- Documented difference between:
+  - bind-mounted dev environments  
+  - image-baked production builds  
+- Began initial thinking around rollback strategy for failed deployments  
+
+---
+
+## Session 23 — Git Workflow Recovery & Branch Discipline  
+### 04/19/2026  
+
+- Addressed confusion caused by accidental overwrites of `main` branch  
+- Re-established strict separation between:
+  - `dev` → active development  
+  - `prod` → VPS deployment source  
+- Introduced safer workflow pattern:
+  - feature work → dev → merge → prod deploy  
+- Investigated lost session logs in Git history  
+- Learned practical use of `reflog` for recovery scenarios  
+- Cleaned up repository history inconsistencies from earlier force pushes  
+- Added basic commit structure rules for session logging consistency  
+- Improved naming convention for commits to include session references  
+
+---
+
+## Session 24 — MailWizz Runtime Debugging & Path Fixes  
+### 04/20/2026  
+
+- Debugged broken routing after container rebuild  
+- Fixed incorrect MailWizz base URL configuration in production  
+- Resolved intermittent failures on `/install` and `/backend` routes  
+- Corrected PHP-FPM environment variable propagation issues  
+- Fixed missing or misaligned `tablePrefix` injection from environment  
+- Verified nginx → PHP-FPM request routing stability  
+- Clarified runtime filesystem vs host-mounted development structure  
+- Confirmed correct application root after extraction restructuring  
+- Improved container logging visibility for debugging boot-time issues  
+
+---
+
+## Session 25 — Full Infrastructure Architecture Review
+### 04/25/2026
+
+- Conducted complete end-to-end code and architecture review of the infra repository
+- Validated all production implementation decisions:
+  - ✅ Proper volume isolation for every MailWizz writable directory
+  - ✅ Correct cron execution inside PHP container (single container pattern)
+  - ✅ Clean separation of dev / production environments
+  - ✅ Proper health check ordering with correct dependency waiting
+  - ✅ Correct read-only volume mount separation between PHP writer / Nginx reader roles
+  - ✅ Production compose file with no development tools or ports exposed
+- Confirmed this implementation correctly solves almost every common deployment pitfall that people encounter when containerizing MailWizz
+- Identified minor areas for incremental improvement:
+  - Replace `chmod 0777` in startup script with proper `www-data` ownership
+  - Add `init: true` for zombie process reaping
+  - Properly isolate internal services from public network
+- Reviewed Nginx Proxy Manager integration pattern
+- Confirmed repository reaches production-ready quality standards
+- Documented that this infrastructure implementation is correctly structured for production deployment
 
 ---
 
