@@ -1578,3 +1578,36 @@ This represents:
 
 ---
 
+## Session 26 — Dev Machine Bootstrap & Environment Automation  
+### 04/29/2026
+
+- Began setup of fresh Ubuntu system to support continued MailWizz development  
+- Transitioned toward automated environment provisioning (bootstrap approach)  
+
+- Created idempotent script to install Firefox Developer Edition:
+  - Added Mozilla APT repository with dedicated source list  
+  - Implemented GPG key import with fingerprint verification  
+  - Configured APT pinning to prioritize Mozilla packages  
+  - Included conditional checks to prevent duplicate setup  
+
+- Established scripting standards for system setup:
+  - `set -e` for fail-fast execution  
+  - Idempotent checks across all steps  
+  - Clear, structured logging output  
+
+- Developed cleanup script to remove default Ubuntu Firefox:
+  - Handles both Snap and APT installations  
+  - Ensures safe re-runs without breaking state  
+  - Prepares system for controlled, predictable browser setup  
+
+- Reinforced separation of environment phases:
+  - Pre-clean (remove defaults)  
+  - Install (apply desired state)  
+
+- Work contributes to long-term goal of reproducible dev environments:
+  - Reduces config drift between machines  
+  - Improves reliability of Docker-based workflows  
+  - Supports faster onboarding and system recovery
+
+---
+
